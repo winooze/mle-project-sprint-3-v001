@@ -1,5 +1,6 @@
 """Класс FastApiHandler, который обрабатывает запросы API."""
 from catboost import CatBoostRegressor
+import os
 
 class FastApiHandler:
     """Класс FastApiHandler, который обрабатывает запрос и возвращает предсказание."""
@@ -13,8 +14,15 @@ class FastApiHandler:
             "model_params": dict
         }
 
-        self.model_path = "/home/mle-user/mle-projects/mle-project-sprint-3-v001/services/models/estate_best_model.cbm"
+        
+        # Current script's directory
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        parent_dir = os.path.dirname(script_dir)
+
+        self.model_path = os.path.join(parent_dir, "models", "estate_best_model.cbm")
         self.load_model(model_path=self.model_path)
+     
+
         
         # необходимые параметры для предсказаний модели оттока
         self.required_model_params = [

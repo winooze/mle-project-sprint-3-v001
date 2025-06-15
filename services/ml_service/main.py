@@ -1,13 +1,16 @@
 """FastAPI-приложение для модели оттока."""
 
 from fastapi import FastAPI, Body
-from fast_api_handler import FastApiHandler
+try: 
+    from fast_api_handler import FastApiHandler
+except: 
+    from .fast_api_handler import FastApiHandler
 
 """
 Пример запуска из директории mle-project-sprint-3-v001/services/ml_service: 
 uvicorn main:app --reload --port 8000 --host 0.0.0.0
 
-Для просмотра документации API и совершения тестовых запросов зайти на http://127.0.0.1:8000/docs
+Для просмотра докумеdockнтации API и совершения тестовых запросов зайти на http://127.0.0.1:8000/docs
 """
 
 # создаём FastAPI-приложение 

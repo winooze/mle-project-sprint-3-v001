@@ -19,8 +19,7 @@ EXPOSE ${APP_PORT}
 
 
 VOLUME /models
-# примонтируйте том с моделями
+# том с моделями
 
-
-CMD uvicorn app.churn_app:app --reload --port ${APP_DOCKER_PORT} --host 0.0.0.0
+CMD uvicorn ml_service.main:app --reload --port ${APP_PORT} --host 0.0.0.0
 # измените команду запуска, учитывая порт из .env

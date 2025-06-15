@@ -35,6 +35,20 @@ curl -X 'POST' \
 
 ```bash
 # команда перехода в нужную директорию
+cd services 
+
+# подтягиваем переменные 
+export $(grep -v '^#' .env | xargs)
+
+# собираем образ 
+docker build . --tag sprint_3_project:0
+
+# запускаем приложение из контейнера 
+docker container run \
+--publish ${APP_PORT}:${APP_PORT} \
+--env-file .env \
+--volume=./models:/services/models \
+sprint_3_project:0
 
 # команда для запуска микросервиса в режиме docker compose
 ```
@@ -43,7 +57,10 @@ curl -X 'POST' \
 
 ```bash
 curl -X 'POST' \
-  'http://localhost:...' \
+  'http://127.0.0.1:8000/api/score_estate/?id=124' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -d ' { "is_apartment": false, "studio": false, "has_elevator": true, "building_type_int": 4, "floor": 5, "kitchen_area": 8.0, "living_area": 56.0, "rooms": 2, "total_area": 52.0, "build_year": 2007, "latitude": 55.72347640991211, "longitude": 37.903202056884766, "ceiling_height": 2.740000009536743, "flats_count": 376, "floors_total": 11 }'
 ```
 
 ## 3. Docker compose для микросервиса и системы моониторинга
