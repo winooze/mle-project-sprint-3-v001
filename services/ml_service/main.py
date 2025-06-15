@@ -6,8 +6,13 @@ try:
 except: 
     from .fast_api_handler import FastApiHandler
 
-from prometheus_fastapi_instrumentator import Instrumentator
-from prometheus_client import Histogram
+# Conditional Prometheus imports and initialization
+try:
+    from prometheus_fastapi_instrumentator import Instrumentator
+    from prometheus_client import Histogram, Count
+    PROMETHEUS_ENABLED = True
+except ImportError:
+    PROMETHEUS_ENABLED = False
 
 """
 Пример запуска из директории mle-project-sprint-3-v001/services/ml_service: 
@@ -23,17 +28,22 @@ app.handler = FastApiHandler()
 
 
 # инициализируем и запускаем экпортёр метрик 
-instrumentator = Instrumentator()
-instrumentator.instrument(app).expose(app)
+if PROMETHEUS_ENABLED: 
+    instrumentator = Instrumentator()
+    instrumentator.instrument(app).expose(app)
 
-main_app_predictions = Histogram(
-    # имя метрики
-    "main_app_predictions",
-    #описание метрики
-    "Histogram of predictions",
-    #указаываем корзины для гистограммы
-    buckets=(1, 2, 4, 5, 10)
-)
+    main_app_predictions = Histogram(
+        # имя метрики
+        "main_app_predictions",
+        #описание метрики
+        "Histogram of predictions",
+        #указаываем корзины для гистограммы
+        buckets=(1, 2, 4, 5, 10)
+    )
+    neg_price_predictions = Count(
+        "neg_price_predictions", 
+        "Counts negative responses"
+    )
 
 @app.get("/")
 def read_root(): 
@@ -79,5 +89,8 @@ def get_prediction_for_item(id: str, model_params: dict):
         "model_params": model_params
     }
     response = app.handler.handle(all_params) 
-    main_app_predictions.observe(response['prediction'])
+    if PROMETHEUS_ENABLED: 
+        main_app_predictions.observe(response['prediction'])
+        if response['prediction'] < 0: 
+            neg_price_predictions.inc() 
     return response

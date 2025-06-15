@@ -41,7 +41,7 @@ cd services
 export $(grep -v '^#' .env | xargs)
 
 # собираем образ 
-docker build . --tag sprint_3_project:0
+docker build -f Dockerfile_ml_service . --tag sprint_3_project:0
 
 # запускаем приложение из контейнера 
 docker container run \
@@ -67,27 +67,32 @@ curl -X 'POST' \
 
 ```bash
 # команда перехода в нужную директорию
-
+cd services 
 # команда для запуска микросервиса в режиме docker compose
-
+docker compose up --build 
 ```
+Далее вручную в IDE переадресовать порт на 9090 
 
 ### Пример curl-запроса к микросервису
 
 ```bash
 curl -X 'POST' \
-  'http://localhost:
+  'http://127.0.0.1:8000/api/score_estate/?id=124' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -d ' { "is_apartment": false, "studio": false, "has_elevator": true, "building_type_int": 4, "floor": 5, "kitchen_area": 8.0, "living_area": 56.0, "rooms": 2, "total_area": 52.0, "build_year": 2007, "latitude": 55.72347640991211, "longitude": 37.903202056884766, "ceiling_height": 2.740000009536743, "flats_count": 376, "floors_total": 11 }'
 ```
 
 ## 4. Скрипт симуляции нагрузки
-Скрипт генерирует <...> запросов в течение <...> секунд ...
+Скрипт генерирует 500 запросов в течение > 1 секунд 
 
 ```
 # команды необходимые для запуска скрипта
-...
+cd mle-project-sprint-3-v001 
+python3 request_endpoint.py
 ```
 
 Адреса сервисов:
-- микросервис: http://localhost:<port>
-- Prometheus: ...
-- Grafana: ...
+- микросервис: http://localhost:8000
+- Prometheus: 9090
+- Grafana: 3000
