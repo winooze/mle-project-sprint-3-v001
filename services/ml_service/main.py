@@ -14,6 +14,7 @@ try:
 except ImportError:
     PROMETHEUS_ENABLED = False
 
+
 """
 Пример запуска из директории mle-project-sprint-3-v001/services/ml_service: 
 uvicorn main:app --reload --port 8000 --host 0.0.0.0
@@ -28,20 +29,16 @@ app.handler = FastApiHandler()
 
 
 # инициализируем и запускаем экпортёр метрик 
-if PROMETHEUS_ENABLED: 
-    instrumentator = Instrumentator()
-    instrumentator.instrument(app).expose(app)
+instrumentator = Instrumentator()
+instrumentator.instrument(app).expose(app)
 
-    main_app_predictions = Histogram(
-        # имя метрики
+main_app_predictions = Histogram(
         "main_app_predictions",
-        #описание метрики
         "Histogram of predictions",
-        #указаываем корзины для гистограммы
         buckets=(1, 2, 4, 5, 10)
     )
-    neg_price_predictions = Count(
-        "neg_price_predictions", 
+neg_price_counter = Count(
+        "neg_price_counter", 
         "Counts negative responses"
     )
 
@@ -92,5 +89,5 @@ def get_prediction_for_item(id: str, model_params: dict):
     if PROMETHEUS_ENABLED: 
         main_app_predictions.observe(response['prediction'])
         if response['prediction'] < 0: 
-            neg_price_predictions.inc() 
+            neg_price_counter.inc() 
     return response

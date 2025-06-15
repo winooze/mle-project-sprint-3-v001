@@ -69,7 +69,7 @@ curl -X 'POST' \
 # команда перехода в нужную директорию
 cd services 
 # команда для запуска микросервиса в режиме docker compose
-docker compose up --build 
+docker compose up --build -d 
 ```
 Далее вручную в IDE переадресовать порт на 9090 
 

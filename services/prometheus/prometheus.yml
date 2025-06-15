@@ -17,4 +17,4 @@ scrape_configs:
     static_configs:
     - targets:
       # указывается адресс микросервиса
-      - main_app:${APP_PORT}
+      - main_app:8000
