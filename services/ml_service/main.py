@@ -6,6 +6,9 @@ try:
 except: 
     from .fast_api_handler import FastApiHandler
 
+from prometheus_fastapi_instrumentator import Instrumentator
+from prometheus_client import Histogram
+
 """
 Пример запуска из директории mle-project-sprint-3-v001/services/ml_service: 
 uvicorn main:app --reload --port 8000 --host 0.0.0.0
@@ -15,9 +18,22 @@ uvicorn main:app --reload --port 8000 --host 0.0.0.0
 
 # создаём FastAPI-приложение 
 app = FastAPI()
-
 # создаём обработчик запросов для API
-app.handler = FastApiHandler()
+app.handler = FastApiHandler() 
+
+
+# инициализируем и запускаем экпортёр метрик 
+instrumentator = Instrumentator()
+instrumentator.instrument(app).expose(app)
+
+main_app_predictions = Histogram(
+    # имя метрики
+    "main_app_predictions",
+    #описание метрики
+    "Histogram of predictions",
+    #указаываем корзины для гистограммы
+    buckets=(1, 2, 4, 5, 10)
+)
 
 @app.get("/")
 def read_root(): 
@@ -62,4 +78,6 @@ def get_prediction_for_item(id: str, model_params: dict):
         "id": id,
         "model_params": model_params
     }
-    return app.handler.handle(all_params) 
+    response = app.handler.handle(all_params) 
+    main_app_predictions.observe(response['prediction'])
+    return response
