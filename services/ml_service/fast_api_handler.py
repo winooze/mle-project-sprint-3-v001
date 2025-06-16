@@ -1,4 +1,3 @@
-"""Класс FastApiHandler, который обрабатывает запросы API."""
 from catboost import CatBoostRegressor
 import os
 
@@ -14,16 +13,10 @@ class FastApiHandler:
             "model_params": dict
         }
 
-        
-        # Current script's directory
-        script_dir = os.path.dirname(os.path.abspath(__file__))
-        parent_dir = os.path.dirname(script_dir)
-
-        self.model_path = os.path.join(parent_dir, "models", "estate_best_model.cbm")
-        self.load_model(model_path=self.model_path)
+        self.model_path = self.get_model_path()
+        self.model = self.load_model(model_path=self.model_path)
      
 
-        
         # необходимые параметры для предсказаний модели оттока
         self.required_model_params = [
             'is_apartment',
@@ -43,6 +36,11 @@ class FastApiHandler:
             'floors_total'
         ]
 
+    @staticmethod
+    def get_model_path(): 
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        parent_dir = os.path.dirname(script_dir)
+        return os.path.join(parent_dir, "models", "estate_best_model.cbm")
 
     def load_model(self, model_path: str):
         """Загружаем обученную модель.
@@ -50,10 +48,11 @@ class FastApiHandler:
             model_path (str): Путь до модели.
         """
         try:
-            self.model = CatBoostRegressor()
-            self.model.load_model(model_path)
+            model = CatBoostRegressor()
+            model.load_model(model_path)
         except Exception as e:
             print(f"Failed to load model: {e}")
+        return model 
 
     def price_predict(self, model_params: dict) -> float:
         """Предсказываем цену недвижимости.
