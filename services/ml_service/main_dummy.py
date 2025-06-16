@@ -1,6 +1,8 @@
 from fastapi import FastAPI, Body 
 from .fast_api_handler import FastApiHandler 
+from .prometheus_custom_metrics import main_app_predictions, neg_price_counter
 from prometheus_fastapi_instrumentator import Instrumentator
+
 
 app = FastAPI()
 
@@ -9,6 +11,10 @@ instrumentator.instrument(app).expose(app)
 
 @app.get("/")
 def read_root(): 
+    return {"service": "predict_estate_price"} 
+
+@app.get("/test")
+def kek(): 
     return {"service": "predict_estate_price"} 
 
 @app.get("/api/healthcheck/")
@@ -51,8 +57,8 @@ def get_prediction_for_item(id: str, model_params: dict):
         "model_params": model_params
     }
     response = app.handler.handle(all_params) 
-    if PROMETHEUS_ENABLED: 
-        main_app_predictions.observe(response['prediction'])
-        if response['prediction'] < 0: 
-            neg_price_counter.inc() 
+    price_pred = response['prediction']
+    main_app_predictions.observe(price_pred)
+    if response['prediction'] < 0: 
+        neg_price_counter.inc() 
     return response

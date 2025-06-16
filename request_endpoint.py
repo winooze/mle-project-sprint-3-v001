@@ -1,80 +1,39 @@
-import random
-import copy
-import requests
-import json
+import random, requests, time 
 
 def generate_random_data():
-    # Original template
     data = {
-        "id": "123",
+        "id": str(random.randint(100, 999)),
         "model_params": {
-            "is_apartment": False,
-            "studio": False,
-            "has_elevator": True,
-            "building_type_int": 4,
-            "floor": 5,
-            "kitchen_area": 8.0,
-            "living_area": 56.0,
-            "rooms": 2,
-            "total_area": 52.0,
-            "build_year": 2007,
-            "latitude": 55.72347640991211,
-            "longitude": 37.903202056884766,
-            "ceiling_height": 2.740000009536743,
-            "flats_count": 376,
-            "floors_total": 11
+            "is_apartment": random.choice([True, False]),
+            "studio": random.choice([True, False]),
+            "has_elevator": random.choice([True, False]),
+            "building_type_int": random.randint(1, 10),
+            "floor": random.randint(1, 30),
+            "kitchen_area": round(random.uniform(5.0, 20.0), 3),
+            "living_area": round(random.uniform(20.0, 150.0), 3),
+            "rooms": random.randint(1, 5),
+            "total_area": round(random.uniform(30.0, 200.0), 3),
+            "build_year": random.randint(1950, 2023),
+            "latitude": round(random.uniform(55.0, 56.0), 6),
+            "longitude": round(random.uniform(37.0, 38.0), 6),
+            "ceiling_height": round(random.uniform(2.5, 3.5), 3),
+            "flats_count": random.randint(50, 500),
+            "floors_total": random.randint(1, 25)
         }
     }
-    
-    # Create a deep copy to modify
-    modified_data = copy.deepcopy(data)
-    
-    # Define ranges for each numerical parameter
-    ranges = {
-        "building_type_int": (1, 10),
-        "floor": (1, 30),
-        "kitchen_area": (5.0, 20.0),
-        "living_area": (20.0, 150.0),
-        "rooms": (1, 5),
-        "total_area": (30.0, 200.0),
-        "build_year": (1950, 2023),
-        "latitude": (55.0, 56.0),
-        "longitude": (37.0, 38.0),
-        "ceiling_height": (2.5, 3.5),
-        "flats_count": (50, 500),
-        "floors_total": (1, 25)
-    }
-    
-    # Randomly modify each numerical value
-    for key in ranges:
-        if key in modified_data["model_params"]:
-            min_val, max_val = ranges[key]
-            
-            if isinstance(modified_data["model_params"][key], int):
-                modified_data["model_params"][key] = random.randint(min_val, max_val)
-            else:
-                modified_data["model_params"][key] = round(random.uniform(min_val, max_val), 3)
-    
-    # Also randomize the ID
-    modified_data["id"] = str(random.randint(100, 999))
-    
-    return modified_data
+    return data
 
-def query_endpoint(n_queries): 
+def query_endpoint(n): 
     url = "http://127.0.0.1:8000/api/score_estate/"
-    headers = {
-        "accept": "application/json",
-        "Content-Type": "application/json"
-    }
-    for i in range(n_queries): 
-        random_data = generate_random_data()
-        response = requests.post(
-            url, 
-            params={"id":random_data['id']}, headers=headers, json=random_data['model_params']
-        )
+    headers = {"accept": "application/json", "Content-Type": "application/json"}
+    cnt_queries_executed = 0
+    for _ in range(n): 
+        data = generate_random_data()
+        requests.post(url, params={"id": data['id']}, headers=headers, json=data['model_params'])
+        cnt_queries_executed += 1 
+        time.sleep(.01)
+    return cnt_queries_executed
 
-
-# Example usage
 if __name__ == "__main__":
-    query_endpoint(500)
-    print('finished')
+    cnt_queries_executed = query_endpoint(1000)
+    print(f'finished, {cnt_queries_executed} queries sent')

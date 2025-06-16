@@ -1,5 +1,5 @@
+"""Кастомные метрики для мониторинга приложения.""" 
 from prometheus_client import Histogram, Counter  
-"""Кастомные метрики для мониторинга приложения."""
 
 main_app_predictions = Histogram(
         "main_app_predictions",

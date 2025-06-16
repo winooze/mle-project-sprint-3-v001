@@ -15,7 +15,7 @@ except:
 # Conditional Prometheus imports and initialization
 try:
     from prometheus_fastapi_instrumentator import Instrumentator
-    from .prometheus_metrics import main_app_predictions, neg_price_counter 
+    from .prometheus_custom_metrics import main_app_predictions, neg_price_counter 
     PROMETHEUS_ENABLED = True
 except ImportError:
     PROMETHEUS_ENABLED = False
@@ -75,9 +75,10 @@ def get_prediction_for_item(id: str, model_params: dict):
         "id": id,
         "model_params": model_params
     }
-    response = app.handler.handle(all_params) 
+    response = app.handler.handle(all_params)
+    price_pred = response['prediction'] 
     if PROMETHEUS_ENABLED: 
-        main_app_predictions.observe(response['prediction'])
+        main_app_predictions.observe(price_pred)
         if response['prediction'] < 0: 
             neg_price_counter.inc() 
     return response
