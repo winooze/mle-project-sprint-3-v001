@@ -1,36 +1,11 @@
-"""
-FastAPI-приложение для модели оттока. 
-Пример запуска из директории mle-project-sprint-3-v001/services/ml_service: 
-uvicorn main:app --reload --port 8000 --host 0.0.0.0
+from fastapi import FastAPI, Body 
+from .fast_api_handler import FastApiHandler 
+from prometheus_fastapi_instrumentator import Instrumentator
 
-Для просмотра докумеdockнтации API и совершения тестовых запросов зайти на http://127.0.0.1:8000/docs
-"""
-
-from fastapi import FastAPI, Body
-try: 
-    from fast_api_handler import FastApiHandler
-except: 
-    from .fast_api_handler import FastApiHandler
-
-# Conditional Prometheus imports and initialization
-try:
-    from prometheus_fastapi_instrumentator import Instrumentator
-    from .prometheus_metrics import main_app_predictions, neg_price_counter 
-    PROMETHEUS_ENABLED = True
-except ImportError:
-    PROMETHEUS_ENABLED = False
-
-
-# создаём FastAPI-приложение 
 app = FastAPI()
-# создаём обработчик запросов для API
-app.handler = FastApiHandler() 
 
-
-# инициализируем и запускаем экпортёр метрик 
-if PROMETHEUS_ENABLED: 
-    instrumentator = Instrumentator()
-    instrumentator.instrument(app).expose(app)
+instrumentator = Instrumentator()
+instrumentator.instrument(app).expose(app)
 
 @app.get("/")
 def read_root(): 
